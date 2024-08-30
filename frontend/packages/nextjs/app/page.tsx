@@ -1,6 +1,30 @@
 "use client";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import type { NextPage } from "next";
+import { useAccount, useBalance, useSignMessage } from "wagmi";
+import { useState } from "react";
+
+// const Home: NextPage = () => {
+//   return (
+//     <>
+//       <div className="flex items-center flex-col flex-grow pt-10">
+//         <div className="px-5">
+//           <h1 className="text-center mb-8">
+//             <span className="block text-2xl mb-2">Welcome to</span>
+//             <span className="block text-4xl font-bold">Scaffold-ETH 2</span>
+//           </h1>
+//           <p className="text-center text-lg">
+//             Get started by editing{" "}
+//             <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
+//               packages/nextjs/pages/index.tsx
+//             </code>
+//           </p>
+//           <ExampleContractRead />
+//         </div>
+//       </div>
+//     </>
+//   );
+// };
 
 const Home: NextPage = () => {
   return (
@@ -17,37 +41,136 @@ const Home: NextPage = () => {
               packages/nextjs/pages/index.tsx
             </code>
           </p>
-          <ExampleContractRead />
+          <PageBody></PageBody>
         </div>
       </div>
     </>
   );
 };
+function WalletInfo() {
+  const { address, isConnecting, isDisconnected, chain } = useAccount();
+  if (address)
+    return (
+      <div>
+        <p>Your account address is {address}</p>
+        <p>Connected to the network {chain?.name}</p>
+        <WalletAction></WalletAction>
+        <WalletBalance address={address as `0x${string}`}></WalletBalance>
+      </div>
+    );
+  if (isConnecting)
+    return (
+      <div>
+        <p>Loading...</p>
+      </div>
+    );
+  if (isDisconnected)
+    return (
+      <div>
+        <p>Wallet disconnected. Connect wallet to continue</p>
+      </div>
+    );
+  return (
+    <div>
+      <p>Connect wallet to continue</p>
+    </div>
+  );
+}
 
-function ExampleContractRead() {
-  const {
-    data: helloWorld,
-    isPending,
-    isError,
-    dataUpdatedAt,
-  } = useScaffoldReadContract({
-    contractName: "HelloWorld",
-    functionName: "helloWorld",
+function WalletAction() {
+  const [signatureMessage, setSignatureMessage] = useState("");
+  const { data, isError, isPending, isSuccess, signMessage } = useSignMessage();
+  return (
+    <div className="card w-96 bg-primary text-primary-content mt-4">
+      <div className="card-body">
+        <h2 className="card-title">Testing signatures</h2>
+        <div className="form-control w-full max-w-xs my-4">
+          <label className="label">
+            <span className="label-text">Enter the message to be signed:</span>
+          </label>
+          <input
+            type="text"
+            placeholder="Type here"
+            className="input input-bordered w-full max-w-xs"
+            value={signatureMessage}
+            onChange={e => setSignatureMessage(e.target.value)}
+          />
+        </div>
+        <button
+          className="btn btn-active btn-neutral"
+          disabled={isPending}
+          onClick={() =>
+            signMessage({
+              message: signatureMessage,
+            })
+          }
+        >
+          Sign message
+        </button>
+        {isSuccess && <div>Signature: {data}</div>}
+        {isError && <div>Error signing message</div>}
+      </div>
+    </div>
+  );
+}
+
+function WalletBalance(params: { address: `0x${string}` }) {
+  const { data, isError, isLoading } = useBalance({
+    address: params.address,
   });
 
-  if (isPending) return <p className="text-center text-lg">Loading...</p>;
-  if (isError) return <p className="text-center text-lg">Error getting information from your contract</p>;
+  if (isLoading) return <div>Fetching balance…</div>;
+  if (isError) return <div>Error fetching balance</div>;
+  return (
+    <div className="card w-96 bg-primary text-primary-content mt-4">
+      <div className="card-body">
+        <h2 className="card-title">Testing useBalance wagmi hook</h2>
+        Balance: {data?.formatted} {data?.symbol}
+      </div>
+    </div>
+  );
+}
 
+// function PageBody() {
+//   return (
+//     <>
+//       <p className="text-center text-lg">Here we are!</p>
+//     </>
+//   );
+// }
+
+function PageBody() {
   return (
     <>
-      <p className="text-center text-lg">The text from the contract is {helloWorld}</p>
-      <p className="text-center text-sm">This data was last updated at {new Date(dataUpdatedAt).toLocaleString()}</p>
+      <p className="text-center text-lg">Here we are!</p>
+      <WalletInfo></WalletInfo>
     </>
   );
 }
 
-export default Home;
+// function ExampleContractRead() {
+//   const {
+//     data: helloWorld,
+//     isPending,
+//     isError,
+//     dataUpdatedAt,
+//   } = useScaffoldReadContract({
+//     contractName: "HelloWorld",
+//     functionName: "helloWorld",
+//   });
 
+//   if (isPending) return <p className="text-center text-lg">Loading...</p>;
+//   if (isError) return <p className="text-center text-lg">Error getting information from your contract</p>;
+
+//   return (
+//     <>
+//       <p className="text-center text-lg">The text from the contract is {helloWorld}</p>
+//       <p className="text-center text-sm">This data was last updated at {new Date(dataUpdatedAt).toLocaleString()}</p>
+//     </>
+//   );
+// }
+
+export default Home;
 
 // "use client";
 
