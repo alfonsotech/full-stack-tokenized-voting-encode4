@@ -1,5 +1,5 @@
 "use client";
-// import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+
 import type { NextPage } from "next";
 import PageBody from "~~/components/PageBody";
 
