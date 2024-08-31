@@ -1,5 +1,6 @@
 import TokenBalance from "./TokenBalance";
 import TokenName from "./TokenName";
+import TokenMinter from "./TokenMinter";
 
 function TokenInfo(params: { address: `0x${string}` }) {
   return (
@@ -8,6 +9,8 @@ function TokenInfo(params: { address: `0x${string}` }) {
         <h2 className="card-title">Testing useReadContract wagmi hook</h2>
         <TokenName></TokenName>
         <TokenBalance address={params.address}></TokenBalance>
+        <h1>Mint MyTokens</h1>
+        <TokenMinter />
       </div>
     </div>
   );
