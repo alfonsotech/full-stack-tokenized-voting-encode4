@@ -2,7 +2,7 @@
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import type { NextPage } from "next";
 import { useAccount, useBalance, useReadContract, useSignMessage } from "wagmi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Home: NextPage = () => {
   return (
@@ -155,6 +155,7 @@ function TokenName() {
 }
 
 function TokenBalance(params: { address: `0x${string}` }) {
+  //TODO: Import ABI form JSON
   const { data, isError, isLoading } = useReadContract({
     address: "0x37dBD10E7994AAcF6132cac7d33bcA899bd2C660",
     abi: [
@@ -189,12 +190,43 @@ function TokenBalance(params: { address: `0x${string}` }) {
   return <div>Balance: {balance}</div>;
 }
 
+//Connecting frontend to fetch public off-chain data: Random Word
+function RandomWord() {
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("https://randomuser.me/api/")
+      .then(res => res.json())
+      .then(data => {
+        setData(data.results[0]);
+        setLoading(false);
+      });
+  }, []);
+
+  if (isLoading) return <p>Loading...</p>;
+  if (!data) return <p>No profile data</p>;
+
+  return (
+    <div className="card w-96 bg-primary text-primary-content mt-4">
+      <div className="card-body">
+        <h2 className="card-title">Testing useState and useEffect from React library</h2>
+        <h1>
+          Name: {data.name.title} {data.name.first} {data.name.last}
+        </h1>
+        <p>Email: {data.email}</p>
+      </div>
+    </div>
+  );
+}
+
 // PAGE
 function PageBody() {
   return (
     <>
       <p className="text-center text-lg">Here we are!</p>
       <WalletInfo></WalletInfo>
+      <RandomWord></RandomWord>
     </>
   );
 }
